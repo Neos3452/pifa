@@ -1,16 +1,14 @@
 /*jslint node:true */
 "use strict";
 
-// grab the nerd model we just created
+var passport = require('passport');
 var Player = require('./models/player');
+var Account = require('./models/account');
 
 module.exports = function(app) {
 
     // server routes ===========================================================
-    // handle things like api calls
-    // authentication routes
 
-    // sample api route
     app.get('/api/player', function(req, res) {
         // use mongoose to get all players in the database
         Player.find(function(err, players) {
@@ -22,6 +20,40 @@ module.exports = function(app) {
             }
 
             res.json(players); // return all players in JSON format
+        });
+    });
+
+    app.get('/api/account', function(req, res) {
+        if (req.query.username) {
+            Account.findByUsername(req.query.username, function(err, accounts) {
+                if (err) {
+                    res.send(err);
+                }
+
+                res.json({result:accounts}); // return all players in JSON format
+            });
+        } else {
+            // use mongoose to get all players in the database
+            Account.find(function(err, accounts) {
+
+                // if there is an error retrieving, send the error.
+                                // nothing after res.send(err) will execute
+                if (err) {
+                    res.send(err);
+                }
+
+                res.json({result:accounts}); // return all players in JSON format
+            });
+        }
+    });
+
+    app.post('/api/account', function(req, res) {
+        // register user locally
+        Account.register(new Account({username : req.body.username}), req.body.password, function(err) {
+            if (err) {
+                return res.json({result:'failure', error:err});
+            }
+            return res.json({result:'success'});
         });
     });
 
