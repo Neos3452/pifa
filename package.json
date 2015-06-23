@@ -1,0 +1,16 @@
+{
+    "name" : "pifa-system",
+    "description" : "Offical player registration system for PIFA",
+    "license" : "MIT",
+    "repository" : {
+        "type" : "git",
+        "url" : "https://github.com/npm/npm.git"
+    },
+    "main" : "server.js",
+    "dependencies" : {
+        "express"           : "latest",
+        "mongoose"          : "latest",
+        "body-parser"       : "latest",
+        "method-override"   : "latest"
+    }
+}
