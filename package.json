@@ -20,7 +20,8 @@
     "passport": "latest",
     "passport-local": "latest",
     "passport-local-mongoose": "latest",
-    "serve-favicon": "latest"
+    "serve-favicon": "latest",
+    "winston": "^1.0.1"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
@@ -39,6 +40,7 @@
     "karma-jasmine": "^0.3.6",
     "karma-phantomjs-launcher": "^0.2.0",
     "karma-safari-launcher": "^0.1.1",
-    "phantomjs": "^1.9.17"
+    "phantomjs": "^1.9.17",
+    "supertest": "^1.0.1"
   }
 }

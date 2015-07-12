@@ -8,12 +8,8 @@ var bodyParser      = require('body-parser');
 var methodOverride  = require('method-override');
 var mongoose        = require('mongoose');
 //var favicon         = require('serve-favicon');
-var logger          = require('morgan');
-
-// authentication
-var cookieParser        = require('cookie-parser');
-var cookieSession       = require('cookie-session');
-var passport            = require('passport');
+var morgan          = require('morgan'); // TODO replace morgan with unified winston logging
+var log             = require('winston');
 
 // configuration ===========================================
 
@@ -27,17 +23,18 @@ var db = require('./config/db');
 var port = process.env.PORT || 8080;
 
 // set up morgan logging
-app.use(logger('dev'));
+app.use(morgan('dev'));
 
 // connect to our mongoDB database
 // (uncomment after entering credentials in config/db.js)
 mongoose.connect(db.url);
 mongoose.connection.on('error', function(error) {
-    console.error('' + error);
+    log.error('' + error);
     process.exit(1);
 });
 
 mongoose.connection.once('open', function() {
+    // TODO route specific setting should be moved into routes, these are app settings
     // get all data/stuff of the body (POST) parameters
     // parse application/json
     app.use(bodyParser.json());
@@ -51,31 +48,10 @@ mongoose.connection.once('open', function() {
     // override with the X-HTTP-Method-Override header in the request. simulate DELETE/PUT
     app.use(methodOverride('X-HTTP-Method-Override'));
 
-    // User session
-    app.use(cookieParser());
-    app.use(cookieSession({
-        keys: [
-            'T3SbXbzj8hZ6SKmDSb7zBzd7',
-            'x2sMyRYGaggUydULVtcqpP4c',
-            'B8fN64RTbf7UtBTFuhuJQqq4'
-        ]
-    }));
-
     // set the static files location /public/img will be /img for users
     app.use(express.static(global.rootPath + '/public'));
     // set favicon
 //    app.use(favicon(__dirname + '/public/favicon.ico'));
-
-
-    // Configure passport middleware
-    app.use(passport.initialize());
-    app.use(passport.session());
-
-    // Configure local authentication
-    var Account = require('./server/models/account');
-    passport.use(Account.createStrategy());
-    passport.serializeUser(Account.serializeUser());
-    passport.deserializeUser(Account.deserializeUser());
 
     // routes ==================================================
     require('./server/routes')(app); // configure our routes
@@ -84,7 +60,7 @@ mongoose.connection.once('open', function() {
     app.listen(port);
 
     // shoutout to the user
-    console.log('Application started on :' + port);
+    log.info('Application started on :' + port);
 
     // expose app
     exports = module.exports = app;

@@ -32,21 +32,10 @@ module.exports = function(grunt) {
     },
     jasmine_nodejs: {
         options: {
-            specNameSuffix: "Spec.js",
-            helperNameSuffix: "Helper.js",
-            useHelpers: false,
-            stopOnFailure: false,
-            reporters: {
-                console: {
-                    colors: true,
-                    cleanStack: 1,       // (0|false)|(1|true)|2|3
-                    verbosity: 4,        // (0|false)|1|2|3|(4|true)
-                    listStyle: "indent", // "flat"|"indent"
-                    activity: false
-                },
-            }
         },
-        specs: ['tests/server/**']
+        server: {
+            specs: ['tests/server/**']
+        }
     },
     jshint: {
       options: {
@@ -71,7 +60,7 @@ module.exports = function(grunt) {
         },
         server: {
           files: ['<%= jshint.server.src %>'],
-          tasks: ['jshint:server', 'jasmine_nodejs']
+          tasks: ['jshint:server', 'jasmine_nodejs:server']
         }
     }
   });
