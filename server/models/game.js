@@ -6,12 +6,11 @@ var mongooseHistory = require('mongoose-history');
 var Match = require('./match.js');
 
 var Game = new mongoose.Schema({
-    season : Number, // TODO change into descriptor for things like leagues, teams and so on
-    matches : [Match],
-    nrOfChanges : Number,
-    creator : { type: mongoose.Schema.Types.ObjectId, ref: 'Account' },
+    season : { type: Number, required: true }, // TODO change into descriptor for things like leagues, teams and so on
+    matches : { type: [Match], required: true },
+    creator : { type: mongoose.Schema.Types.ObjectId, ref: 'Account', required: true },
 });
 
-Game.plugins(mongooseHistory);
+Game.plugin(mongooseHistory);
 
 module.exports = mongoose.model('Game', Game);

@@ -1,28 +1,24 @@
 /*jslint node:true */
 "use strict";
 
-var Player = require('./models/player');
+var account = require('./account_routes');
+var game = require('./game_api');
 
 module.exports = function(app) {
 
     // server routes ===========================================================
 
     // all account routes - register, login, logout etc.
-    app.use('/api/account', require('./account/account_routes').app);
+    app.use('/api/account', account.app);
 
-    app.get('/api/player', function(req, res) {
-        // use mongoose to get all players in the database
-        Player.find(function(err, players) {
+    // apis which require authentication to be viewed
+    app.all('/api/player', account.ensureAuthentication);
+    app.post('/api/game', account.ensureAuthentication);
+    app.put('/api/game', account.ensureAuthentication);
+    app.delete('/api/game', account.ensureAuthentication);
 
-            // if there is an error retrieving, send the error.
-                            // nothing after res.send(err) will execute
-            if (err) {
-                res.send(err);
-            }
-
-            res.json(players); // return all players in JSON format
-        });
-    });
+    // other routes
+    app.use('/api/game', game.app);
 
     // frontend routes =========================================================
 
