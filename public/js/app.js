@@ -1,5 +1,5 @@
 /*global angular */
 (function() {
 "use strict";
-angular.module('sampleApp', ['ngRoute', 'appRoutes', 'MainCtrl', 'PlayerCtrl', 'PlayerService', 'AccountCtrl']);
+angular.module('app', ['ngRoute', 'appRoutes', 'MainCtrl', 'PlayerCtrl', 'PlayerService', 'AccountCtrl']);
 })();
