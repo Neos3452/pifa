@@ -15,6 +15,12 @@ angular.module('appRoutes', []).config(['$routeProvider', '$locationProvider', f
         .when('/players', {
             templateUrl: 'views/player.html',
             controller: 'PlayerController'
+        })
+
+        // players page that will use the PlayerController
+        .when('/account', {
+            templateUrl: 'views/account.html',
+            controller: 'AccountController'
         });
 
     $locationProvider.html5Mode(true);

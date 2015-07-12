@@ -1,12 +1,13 @@
 /*jslint node:true */
 
-// grab the mongoose module
+// grab the mongoose and auth module
 var mongoose = require('mongoose');
 var passportLocalMongoose = require('passport-local-mongoose');
 
 var Account = new mongoose.Schema({
     username : String,
-    password : String
+    password : String,
+    roles : [String]
 });
 
 Account.plugin(passportLocalMongoose);

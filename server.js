@@ -14,7 +14,6 @@ var logger          = require('morgan');
 var cookieParser        = require('cookie-parser');
 var cookieSession       = require('cookie-session');
 var passport            = require('passport');
-var LocalAuthStrategy   = require('passport-local').Strategy;
 
 // configuration ===========================================
 
