@@ -1,24 +1,25 @@
 {
-    "name" : "pifa-system",
-    "description" : "Offical player registration system for PIFA",
-    "license" : "MIT",
-    "repository" : {
-        "type" : "git",
-        "url" : "https://github.com/npm/npm.git"
-    },
-    "main" : "server.js",
-    "dependencies" : {
-        "express"           : "latest",
-        "mongoose"          : "latest",
-        "body-parser"       : "latest",
-        "method-override"   : "latest",
-        "cookie-parser"     : "latest",
-        "cookie-session"    : "latest",
-        "debug"             : "latest",
-        "morgan"            : "latest",
-        "passport"          : "latest",
-        "passport-local"    : "latest",
-        "passport-local-mongoose": "latest",
-        "serve-favicon"     : "latest"
-    }
+  "name": "pifa-system",
+  "description": "Offical player registration system for PIFA",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/npm/npm.git"
+  },
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "latest",
+    "cookie-parser": "latest",
+    "cookie-session": "latest",
+    "debug": "latest",
+    "express": "latest",
+    "method-override": "latest",
+    "mongoose": "latest",
+    "mongoose-history": "latest",
+    "morgan": "latest",
+    "passport": "latest",
+    "passport-local": "latest",
+    "passport-local-mongoose": "latest",
+    "serve-favicon": "latest"
+  }
 }
