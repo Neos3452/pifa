@@ -7,7 +7,7 @@ describe('Account', function() {
     var db = require('../../config/db');
 
     var Account = require('../../server/models/account');
-    var accountRoutes = require('../../server/account/account_routes').app;
+    var accountRoutes = require('../../server/account_routes').app;
     var agent = null;
 
     beforeAll(function(done) {
@@ -31,23 +31,25 @@ describe('Account', function() {
     });
 
     it('can register', function(done) {
-        agent.post('/')
+        agent.post('/create')
             .send({username: 'dummy', password: 'even dummier'})
             .end(function(err, res){
                 expect(err).toBeNull();
                 expect(res.status).toBe(200);
                 expect(res.body.result).toBe('success');
+                expect(res.body.errorObject).not.toBeDefined();
                 done();
             });
     });
 
     it('should be logged in after registration', function(done) {
-        agent.post('/')
+        agent.post('/create')
             .send({username: 'dummy', password: 'even dummier'})
             .end(function(err, res){
                 expect(err).toBeNull();
                 expect(res.status).toBe(200);
                 expect(res.body.result).toBe('success');
+                expect(res.body.errorObject).not.toBeDefined();
                 agent.get('/logged')
                     .end(function(err, res){
                         expect(err).toBeNull();
@@ -58,14 +60,15 @@ describe('Account', function() {
     });
 
     it('cannot register user twice', function(done) {
-        agent.post('/')
+        agent.post('/create')
             .send({username: 'dummy', password: 'even dummier'})
             .end(function(err, res){
                 expect(err).toBeNull();
                 expect(res.status).toBe(200);
                 expect(res.body.result).toBe('success');
+                expect(res.body.errorObject).not.toBeDefined();
 
-                agent.post('/')
+                agent.post('/create')
                     .send({username: 'dummy', password: 'even dummier'})
                     .end(function(err, res){
                         expect(err).toBeNull();
