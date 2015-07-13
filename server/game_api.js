@@ -10,7 +10,7 @@ var log = require('winston');
 var Game = require('./models/game');
 var uniformResponses = require('./uniform_responses');
 
-var gameApp = express.Router();
+var gameApp = express();
 
 // set up morgan logging
 gameApp.use(morgan('dev'));
@@ -50,11 +50,14 @@ gameApp.get('/:id', function(req, res) {
 });
 
 gameApp.post('/', function(req, res) {
+    log.info(req.body);
     if (req.body) {
+        log.info('ok');
         var game = new Game(req.body);
         game.save(function(err) {
             if (err) {
-                res.json(uniformResponses.createErrorResponse(err, 9001, "dsd"));
+                log.error(err);
+                res.json(uniformResponses.createErrorResponse(err, 9001));
             } else {
                 res.json(uniformResponses.createSuccessResponse());
             }

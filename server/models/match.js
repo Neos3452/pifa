@@ -2,7 +2,7 @@
 
 // grab the mongoose module
 var mongoose = require('mongoose');
-var mongooseHistory = require('mongoose-history');
+//var mongooseHistory = require('mongoose-history');
 
 var TeamDesc = {
     score : Number,
@@ -26,6 +26,6 @@ var Match = new mongoose.Schema({
     duration : {type:Number, default:0.0} // in seconds
 });
 
-Match.plugin(mongooseHistory);
+//Match.plugin(mongooseHistory);
 
 module.exports = mongoose.model('Match', Match);

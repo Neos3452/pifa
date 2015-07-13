@@ -1,11 +1,12 @@
 /*jslint jasmine:true, node:true*/
 describe('Game', function() {
 
-    var bodyParser = require('body-parser');
     var request = require('supertest');
     var mongoose = require('mongoose');
-    var db = require('../../config/db');
+    var db = require('../../config/test_db');
 
+    var Account = require('../../server/models/account');
+    var Match = require('../../server/models/match');
     var Game = require('../../server/models/game');
     var gameRoutes = require('../../server/game_api').app;
     var agent = null;
@@ -16,10 +17,6 @@ describe('Game', function() {
 
     beforeEach(function(){
         agent = request.agent(gameRoutes);
-        // should use the same settings as in game route
-        gameRoutes.use(bodyParser.json());
-        gameRoutes.use(bodyParser.json({ type: 'application/vnd.api+json' }));
-        gameRoutes.use(bodyParser.urlencoded({ extended: true }));
     });
 
     afterEach(function(done) {
@@ -32,11 +29,13 @@ describe('Game', function() {
 
     describe('creation', function() {
         it('simple game', function(done) {
+            var dummyAcc = new Account({});
+            var matches = [new Match({})];
             agent.post('/')
                 .send({
                     season: 100,
-                    matches: [],
-                    creator: 0
+                    matches: matches,
+                    creator: dummyAcc._id
                 })
                 .end(function(err, res){
                     expect(err).toBeNull();
