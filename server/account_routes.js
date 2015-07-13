@@ -1,11 +1,10 @@
 /*jslint node:true */
 "use strict";
 
-var express = require('express');
 var bodyParser = require('body-parser');
 
 // authentication
-var passport = require('passport');
+var passport            = require('passport');
 var cookieParser        = require('cookie-parser');
 var cookieSession       = require('cookie-session');
 
@@ -14,40 +13,6 @@ var log = require('winston');
 
 var Account = require('./models/account');
 var uniformResponses = require('./uniform_responses');
-
-var accountApp = express();
-var registrationCb = null;
-
-// set up morgan logging
-accountApp.use(morgan('dev'));
-
-// parse application/json
-accountApp.use(bodyParser.json());
-
-// parse application/vnd.api+json as json
-accountApp.use(bodyParser.json({ type: 'application/vnd.api+json' }));
-
-// parse application/x-www-form-urlencoded
-accountApp.use(bodyParser.urlencoded({ extended: true }));
-
-// User session
-accountApp.use(cookieParser());
-accountApp.use(cookieSession({
-    keys: [
-        'T3SbXbzj8hZ6SKmDSb7zBzd7',
-        'x2sMyRYGaggUydULVtcqpP4c',
-        'B8fN64RTbf7UtBTFuhuJQqq4'
-    ]
-}));
-
-// Configure passport middleware
-accountApp.use(passport.initialize());
-accountApp.use(passport.session());
-
-// Configure local authentication
-passport.use(Account.createStrategy());
-passport.serializeUser(Account.serializeUser());
-passport.deserializeUser(Account.deserializeUser());
 
 function ensureAuthentication(req, res, next) {
     if (req.isAuthenticated()) {
@@ -58,7 +23,42 @@ function ensureAuthentication(req, res, next) {
     }
 }
 
-accountApp.get('/', ensureAuthentication, function(req, res) {
+module.exports.configureForAuthentication = function (path, app, registrationCb) {
+// Remove a forward slash / at the end of the string
+path = path.replace(/\/$/, '');
+
+// set up morgan logging
+app.use(morgan('dev'));
+
+// parse application/json
+app.use(bodyParser.json());
+
+// parse application/vnd.api+json as json
+app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// User session
+app.use(cookieParser());
+app.use(cookieSession({
+    keys: [
+        'T3SbXbzj8hZ6SKmDSb7zBzd7',
+        'x2sMyRYGaggUydULVtcqpP4c',
+        'B8fN64RTbf7UtBTFuhuJQqq4'
+    ]
+}));
+
+// Configure passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Configure local authentication
+passport.use(Account.createStrategy());
+passport.serializeUser(Account.serializeUser());
+passport.deserializeUser(Account.deserializeUser());
+
+app.get(path + '/', ensureAuthentication, function(req, res) {
     if (req.user.username) {
         // get user account information
         Account.findByUsername(req.user.username, function(err, accounts) {
@@ -81,7 +81,7 @@ accountApp.get('/', ensureAuthentication, function(req, res) {
     }
 });
 
-accountApp.post('/create', function(req, res) {
+app.post(path + '/create', function(req, res) {
     // register user locally
     var user = new Account({username : req.body.username});
     Account.register(user, req.body.password, function(err) {
@@ -104,24 +104,22 @@ accountApp.post('/create', function(req, res) {
 });
 
 // route to log in
-accountApp.post('/login',
+app.post(path + '/login',
                 passport.authenticate('local'),
                 function(req, res) { res.sendStatus(200); }
                );
 
 // route to check if logged in
-accountApp.get('/logged',
+app.get(path + '/logged',
                 ensureAuthentication,
                 function(req, res) { res.sendStatus(200); }
                );
 
 // route to log out
-accountApp.post('/logout',
+app.post(path + '/logout',
                 function(req, res) { req.logOut(); res.sendStatus(200); }
                );
 
-module.exports.app = accountApp;
-module.exports.ensureAuthentication = ensureAuthentication;
-module.exports.setRegistrationCallback = function(cb) {
-    registrationCb = cb;
 };
+
+module.exports.ensureAuthentication = ensureAuthentication;

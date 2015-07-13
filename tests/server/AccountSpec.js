@@ -1,81 +1,108 @@
 /*jslint jasmine:true, node:true*/
 describe('Account', function() {
 
-    var bodyParser = require('body-parser');
     var request = require('supertest');
     var mongoose = require('mongoose');
-    var db = require('../../config/db');
+    var db = require('../../config/test_db');
 
     var Account = require('../../server/models/account');
-    var accountRoutes = require('../../server/account_routes').app;
-    var agent = null;
+    var express = require('express');
+    var accountRoutes = require('../../server/account_routes');
+
+    var accountApp = express();
+    accountRoutes.configureForAuthentication('', accountApp);
 
     beforeAll(function(done) {
-       mongoose.connect(db.url, {}, done);
-    });
-
-    beforeEach(function(){
-        agent = request.agent(accountRoutes);
-        // should use the same settings as in account route
-        accountRoutes.use(bodyParser.json());
-        accountRoutes.use(bodyParser.json({ type: 'application/vnd.api+json' }));
-        accountRoutes.use(bodyParser.urlencoded({ extended: true }));
-    });
-
-    afterEach(function(done) {
-        Account.remove({}, done);
+        mongoose.connect(db.url, {}, done);
     });
 
     afterAll(function(done) {
-       mongoose.disconnect(done);
+        mongoose.disconnect(done);
     });
 
-    it('can register', function(done) {
-        agent.post('/create')
-            .send({username: 'dummy', password: 'even dummier'})
-            .end(function(err, res){
-                expect(err).toBeNull();
-                expect(res.status).toBe(200);
-                expect(res.body.result).toBe('success');
-                expect(res.body.errorObject).not.toBeDefined();
-                done();
-            });
+    describe('registration', function() {
+        var agent = null;
+
+        beforeEach(function(){
+            agent = request.agent(accountApp);
+        });
+
+        afterEach(function(done) {
+            Account.remove({}, done);
+        });
+
+        it('is possible', function(done) {
+            agent.post('/create')
+                .send({username: 'dummy', password: 'even dummier'})
+                .end(function(err, res){
+                    expect(err).toBeNull();
+                    expect(res.status).toBe(200);
+                    expect(res.body.result).toBe('success');
+                    expect(res.body.errorObject).not.toBeDefined();
+                    done();
+                });
+        });
+
+        it('logs in automatically', function(done) {
+            agent.post('/create')
+                .send({username: 'dummy', password: 'even dummier'})
+                .end(function(err, res){
+                    expect(err).toBeNull();
+                    expect(res.status).toBe(200);
+                    expect(res.body.result).toBe('success');
+                    expect(res.body.errorObject).not.toBeDefined();
+                    agent.get('/logged')
+                        .end(function(err, res){
+                            expect(err).toBeNull();
+                            expect(res.status).toBe(200);
+                            done();
+                        });
+                });
+        });
+
+        it('forbids multiple registrations', function(done) {
+            agent.post('/create')
+                .send({username: 'dummy', password: 'even dummier'})
+                .end(function(err, res){
+                    expect(err).toBeNull();
+                    expect(res.status).toBe(200);
+                    expect(res.body.result).toBe('success');
+                    expect(res.body.errorObject).not.toBeDefined();
+
+                    agent.post('/create')
+                        .send({username: 'dummy', password: 'even dummier'})
+                        .end(function(err, res){
+                            expect(err).toBeNull();
+                            expect(res.status).toBe(200);
+                            expect(res.body.result).toBe('failure');
+                            done();
+                        });
+                });
+        });
     });
 
-    it('should be logged in after registration', function(done) {
-        agent.post('/create')
-            .send({username: 'dummy', password: 'even dummier'})
-            .end(function(err, res){
-                expect(err).toBeNull();
-                expect(res.status).toBe(200);
-                expect(res.body.result).toBe('success');
-                expect(res.body.errorObject).not.toBeDefined();
-                agent.get('/logged')
-                    .end(function(err, res){
-                        expect(err).toBeNull();
-                        expect(res.status).toBe(200);
-                        done();
-                    });
-            });
+    describe('log in process', function() {
+        beforeAll(function(done) {
+            request.agent(accountRoutes).post('/create')
+                .send({username: 'dummy', password: 'even dummier'})
+                .end(function(err, res){
+                    expect(err).toBeNull();
+                    expect(res.status).toBe(200);
+                    expect(res.body.result).toBe('success');
+                    expect(res.body.errorObject).not.toBeDefined();
+                    done();
+                });
+        });
+
+        afterAll(function(done) {
+            Account.remove({}, done);
+        });
+
+        var agent = null;
+
+        beforeEach(function(){
+            agent = request.agent(accountApp);
+        });
     });
 
-    it('cannot register user twice', function(done) {
-        agent.post('/create')
-            .send({username: 'dummy', password: 'even dummier'})
-            .end(function(err, res){
-                expect(err).toBeNull();
-                expect(res.status).toBe(200);
-                expect(res.body.result).toBe('success');
-                expect(res.body.errorObject).not.toBeDefined();
-
-                agent.post('/create')
-                    .send({username: 'dummy', password: 'even dummier'})
-                    .end(function(err, res){
-                        expect(err).toBeNull();
-                        expect(res.status).toBe(200);
-                        expect(res.body.result).toBe('failure');
-                        done();
-                    });
-            });
-    });
 });

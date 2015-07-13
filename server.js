@@ -11,6 +11,9 @@ var mongoose        = require('mongoose');
 var morgan          = require('morgan'); // TODO replace morgan with unified winston logging
 var log             = require('winston');
 
+// expose app for circular dependencies
+exports = module.exports = app;
+
 // configuration ===========================================
 
 // root directory
@@ -61,7 +64,4 @@ mongoose.connection.once('open', function() {
 
     // shoutout to the user
     log.info('Application started on :' + port);
-
-    // expose app
-    exports = module.exports = app;
 });

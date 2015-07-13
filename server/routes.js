@@ -9,7 +9,7 @@ module.exports = function(app) {
     // server routes ===========================================================
 
     // all account routes - register, login, logout etc.
-    app.use('/api/account', account.app);
+    account.configureForAuthentication('/api/account', app);
 
     // apis which require authentication to be viewed
     app.all('/api/player', account.ensureAuthentication);
