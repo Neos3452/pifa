@@ -2,6 +2,11 @@
 
 module.exports = function(grunt) {
 
+  var serverTest = [
+      'jshint:server',
+      'jasmine_nodejs:server'
+  ];
+
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     concat: {
@@ -28,6 +33,10 @@ module.exports = function(grunt) {
         configFile: 'tests/karma_public.js',
         background: true,
         singleRun: false
+      },
+      single: {
+        configFile: 'tests/karma_public.js',
+        singleRun: true
       }
     },
     jasmine_nodejs: {
@@ -60,7 +69,7 @@ module.exports = function(grunt) {
         },
         server: {
           files: ['<%= jshint.server.src %>'],
-          tasks: ['jshint:server', 'jasmine_nodejs:server']
+          tasks: serverTest
         }
     }
   });
@@ -74,7 +83,9 @@ module.exports = function(grunt) {
 
   grunt.registerTask('build', ['jshint', 'karma', 'concat', 'uglify']);
 
-  grunt.registerTask('public_tests', ['karma:unit:start', 'watch:public']);
-  grunt.registerTask('server_tests', ['watch:server']);
+  grunt.registerTask('watch_public_tests', ['karma:unit:start', 'watch:public']);
+  grunt.registerTask('watch_server_tests', ['watch:server']);
+  grunt.registerTask('public_test', ['jshint:public', 'karma:single']);
+  grunt.registerTask('server_test', serverTest);
 
 };
