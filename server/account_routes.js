@@ -8,67 +8,71 @@ var passport            = require('passport');
 var cookieParser        = require('cookie-parser');
 var cookieSession       = require('cookie-session');
 
-var morgan = require('morgan'); // TODO replace morgan with unified winston logging
+//var morgan = require('morgan'); // TODO replace morgan with unified winston logging
 var log = require('winston');
 
 var Account = require('./models/account');
 var uniformResponses = require('./uniform_responses');
 
-function ensureAuthentication(req, res, next) {
+var ensureAuthentication = module.exports.ensureAuthentication = function (req, res, next) {
     if (req.isAuthenticated()) {
         next();
     } else {
         log.warn('Unauthorized access, body: ', req.body);
         res.sendStatus(401);
     }
-}
+};
 
-module.exports.configureForAuthentication = function (path, app, registrationCb) {
-// Remove a forward slash / at the end of the string
-path = path.replace(/\/$/, '');
+module.exports.init = function () {
 
-// set up morgan logging
-app.use(morgan('dev'));
+    var middlewares = [
+        // parse application/json
+        bodyParser.json(),
 
-// parse application/json
-app.use(bodyParser.json());
+        // parse application/vnd.api+json as json
+        bodyParser.json({ type: 'application/vnd.api+json' }),
 
-// parse application/vnd.api+json as json
-app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
+        // parse application/x-www-form-urlencoded
+        bodyParser.urlencoded({ extended: true }),
 
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }));
+        // User session
+        cookieParser(),
+        cookieSession({
+            keys: [
+                'T3SbXbzj8hZ6SKmDSb7zBzd7',
+                'x2sMyRYGaggUydULVtcqpP4c',
+                'B8fN64RTbf7UtBTFuhuJQqq4'
+            ]
+        }),
 
-// User session
-app.use(cookieParser());
-app.use(cookieSession({
-    keys: [
-        'T3SbXbzj8hZ6SKmDSb7zBzd7',
-        'x2sMyRYGaggUydULVtcqpP4c',
-        'B8fN64RTbf7UtBTFuhuJQqq4'
-    ]
-}));
+        // Configure passport middleware
+        passport.initialize(),
+        passport.session(),
+    ];
 
-// Configure passport middleware
-app.use(passport.initialize());
-app.use(passport.session());
+    // Configure local authentication
+    passport.use(Account.createStrategy());
+    passport.serializeUser(Account.serializeUser());
+    passport.deserializeUser(Account.deserializeUser());
 
-// Configure local authentication
-passport.use(Account.createStrategy());
-passport.serializeUser(Account.serializeUser());
-passport.deserializeUser(Account.deserializeUser());
+    return middlewares;
+};
 
-app.get(path + '/', ensureAuthentication, function(req, res) {
-    if (req.user.username) {
+module.exports.getUserInfo = function(req, res) {
+    if (req.body.username) {
         // get user account information
-        Account.findByUsername(req.user.username, function(err, accounts) {
+        Account.findByUsername(req.body.username, function(err, accounts) {
             if (err) {
                 res.json(uniformResponses.createErrorResponse(err, 9001));
             } else {
+                if (!accounts) {
+                    accounts = {};
+                }
                 res.json(uniformResponses.createSuccessResponse(accounts));
             }
         });
     } else {
+        // res.sendStatus(/*BAD_REQUEST*/);
         // TODO remove this or restrict access with roles
         // get all accounts from the database
         Account.find(function(err, accounts) {
@@ -79,9 +83,9 @@ app.get(path + '/', ensureAuthentication, function(req, res) {
             }
         });
     }
-});
+};
 
-app.post(path + '/create', function(req, res) {
+module.exports.register = function(req, res) {
     // register user locally
     var user = new Account({username : req.body.username});
     Account.register(user, req.body.password, function(err) {
@@ -92,34 +96,28 @@ app.post(path + '/create', function(req, res) {
         req.login(user, function(err) {
             if (err) {
                 log.warn('error during singup login:\n', err);
-                if (registrationCb) {
-                    setTimeout(registrationCb, 0);
-                }
+//                if (registrationCb) {
+//                    setTimeout(registrationCb, 0);
+//                }
                 // TODO fix error message and code
                 return res.json(uniformResponses.createErrorResponse(err, 9001));
             }
             return res.json(uniformResponses.createSuccessResponse());
         });
     });
-});
-
-// route to log in
-app.post(path + '/login',
-                passport.authenticate('local'),
-                function(req, res) { res.sendStatus(200); }
-               );
-
-// route to check if logged in
-app.get(path + '/logged',
-                ensureAuthentication,
-                function(req, res) { res.sendStatus(200); }
-               );
-
-// route to log out
-app.post(path + '/logout',
-                function(req, res) { req.logOut(); res.sendStatus(200); }
-               );
-
 };
 
-module.exports.ensureAuthentication = ensureAuthentication;
+// route to log in
+module.exports.login = [
+    passport.authenticate('local'),
+    function(req, res) { res.sendStatus(200); }
+];
+
+// route to check if logged in
+module.exports.loginStatus = [
+    ensureAuthentication,
+    function(req, res) { res.sendStatus(200); }
+];
+
+// route to log out
+module.exports.logout = function(req, res) { req.logOut(); res.sendStatus(200); };

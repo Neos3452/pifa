@@ -10,7 +10,12 @@ describe('Account', function() {
     var accountRoutes = require('../../server/account_routes');
 
     var accountApp = express();
-    accountRoutes.configureForAuthentication('', accountApp);
+    accountApp.use('/', accountRoutes.init());
+    accountApp.get('/get', accountRoutes.getUserInfo);
+    accountApp.post('/create', accountRoutes.register);
+    accountApp.post('/login', accountRoutes.login);
+    accountApp.get('/logged', accountRoutes.loginStatus);
+    accountApp.post('/logout', accountRoutes.logout);
 
     beforeAll(function(done) {
         mongoose.connect(db.url, {}, done);

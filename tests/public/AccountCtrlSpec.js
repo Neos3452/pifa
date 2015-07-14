@@ -15,7 +15,7 @@ describe('AccountController', function() {
     it('equals to set string', function() {
       var $scope = {};
       var controller = $controller('AccountController', { $scope: $scope });
-      expect($scope.tagline).toEqual('Register, Log ins, Log out!');
+      expect($scope.tagline).toEqual('Register, Log in, Log out!');
     });
   });
 });

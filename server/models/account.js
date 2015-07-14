@@ -10,6 +10,7 @@ var Account = new mongoose.Schema({
     roles : [String]
 });
 
+// Save as user passport local account
 Account.plugin(passportLocalMongoose);
 
 module.exports = mongoose.model('Account', Account);
