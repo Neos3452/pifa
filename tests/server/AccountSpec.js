@@ -3,9 +3,11 @@ describe('Account', function() {
 
     var request = require('supertest');
     var mongoose = require('mongoose');
+    var when = require('when');
     var db = require('../../config/test_db');
 
     var Account = require('../../server/models/account');
+    var Player = require('../../server/models/player');
     var express = require('express');
     var accountRoutes = require('../../server/account_routes');
 
@@ -33,7 +35,15 @@ describe('Account', function() {
         });
 
         afterEach(function(done) {
-            Account.remove({}, done);
+            when.all([
+                    Account.remove({}).exec(),
+                    Player.remove({}).exec()
+                ]).then(function() {
+                    delete mongoose.models.Account;
+                    delete mongoose.modelSchemas.Account;
+                    delete mongoose.models.Player;
+                    delete mongoose.modelSchemas.Player;
+                }).then(done);
         });
 
         it('is possible', function(done) {

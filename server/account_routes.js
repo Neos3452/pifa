@@ -12,6 +12,7 @@ var cookieSession       = require('cookie-session');
 var log = require('winston');
 
 var Account = require('./models/account');
+var Player = require('./models/player');
 var uniformResponses = require('./uniform_responses');
 
 var ensureAuthentication = module.exports.ensureAuthentication = function (req, res, next) {
@@ -86,25 +87,48 @@ module.exports.getUserInfo = function(req, res) {
 };
 
 module.exports.register = function(req, res) {
+
+    // TODO validate req.body
+
+    log.info("username:" + req.body.username);
+
     // register user locally
-    var user = new Account({username : req.body.username});
-    Account.register(user, req.body.password, function(err) {
+    var user = new Account({username: req.body.username});
+    var player = new Player({account: user, name: req.body.username});
+    player.save(function(err) {
         if (err) {
-            log.warn('error during singup:\n', err);
+            log.warn('Error during player creation:\n', err);
             return res.json(uniformResponses.createErrorResponse(err, 9001));
         }
-        req.login(user, function(err) {
+        Account.register(user, req.body.password, function(err) {
             if (err) {
-                log.warn('error during singup login:\n', err);
-//                if (registrationCb) {
-//                    setTimeout(registrationCb, 0);
-//                }
-                // TODO fix error message and code
-                return res.json(uniformResponses.createErrorResponse(err, 9001));
+                log.warn('error during singup:\n', err);
+                // We need to remove player created before signup
+                Player.findByIdAndRemove(player._id, function(err) {
+                    if (err) {
+                        log.error('Whoa, player remove has failed, this can cause problem:\n', err);
+                        // we can do nothing here
+                    }
+                    return res.json(uniformResponses.createErrorResponse(err, 9001));
+                });
+                // ASSERT_NOT_REACHED
+            } else {
+                req.login(user, function(err) {
+                    if (err) {
+                        log.warn('error during singup login:\n', err);
+        //                if (registrationCb) {
+        //                    setTimeout(registrationCb, 0);
+        //                }
+                        // TODO fix error message and code
+                        return res.json(uniformResponses.createErrorResponse(err, 9001));
+                    }
+                    return res.json(uniformResponses.createSuccessResponse());
+                });
+                // ASSERT_NOT_REACHED
             }
-            return res.json(uniformResponses.createSuccessResponse());
         });
     });
+
 };
 
 // route to log in

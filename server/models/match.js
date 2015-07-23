@@ -11,18 +11,18 @@ var TeamDesc = {
         defense : Number
     },
     players : {
-        offense : { type: mongoose.Schema.Types.ObjectId, ref: 'Account' },
-        defense : { type: mongoose.Schema.Types.ObjectId, ref: 'Account' }
+        offense : { type: mongoose.Schema.Types.ObjectId, ref: 'Player' },
+        defense : { type: mongoose.Schema.Types.ObjectId, ref: 'Player' }
     }
 };
 
 // sub-doc not saved directly into database
 var Match = new mongoose.Schema({
-    game : {type: mongoose.Schema.Types.ObjectId, ref: 'Game'},
+    game : {type: mongoose.Schema.Types.ObjectId, ref: 'Game', required: true},
     matchNumber : Number,
     team1 : TeamDesc,
     team2 : TeamDesc,
-    table : {type:String, default:"IBC2.2"},
+    table : {type:String, default:"IBC1.2"},
     duration : {type:Number, default:0.0} // in seconds
 });
 

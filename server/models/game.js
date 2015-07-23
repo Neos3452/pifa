@@ -7,7 +7,7 @@ var Match = require('./match.js');
 
 var Game = new mongoose.Schema({
     season : { type: Number, required: true }, // TODO change into descriptor for things like leagues, teams and so on
-    matches : { type: [Match.schema], required: true },
+    matches : [Match.schema],
     creator : { type: mongoose.Schema.Types.ObjectId, ref: 'Account', required: true },
 });
 

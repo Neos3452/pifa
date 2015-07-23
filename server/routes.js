@@ -12,6 +12,7 @@ module.exports = function(app) {
     app.use('/api', account.init());
     app.get('/api/account/:user?',
             account.ensureAuthentication,
+            // TODO this doesn't fit here, but where does it? account_routes doesn't care about request param right now
             // inject username from path, query, param and username
             function (req, res, next) {
                 if (!req.body.username) {
@@ -37,7 +38,8 @@ module.exports = function(app) {
     app.delete('/api/game', account.ensureAuthentication);
 
     // other routes
-    app.use('/api/game', game.app);
+    app.get('/api/game', game.getGames);
+    app.post('/api/game', game.createGame);
 
     // frontend routes =========================================================
 
