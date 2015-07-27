@@ -21,6 +21,16 @@ angular.module('appRoutes', []).config(['$routeProvider', '$locationProvider', f
         .when('/account', {
             templateUrl: 'views/account.html',
             controller: 'AccountController'
+        })
+
+        .when('/signin', {
+            templateUrl: 'views/signin.html',
+            controller: 'SigninController'
+        })
+
+        .when('/logout', {
+            templateUrl: 'views/logout.html',
+            controller: 'LogoutController'
         });
 
     $locationProvider.html5Mode(true);

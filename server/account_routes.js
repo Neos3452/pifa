@@ -93,35 +93,42 @@ module.exports.register = function(req, res) {
     log.info("username:" + req.body.username);
 
     // register user locally
-    var user = new Account({username: req.body.username});
+    var user = new Account({username: req.body.username, originalTeam:req.body.team});
     var player = new Player({account: user, name: req.body.username});
     player.save(function(err) {
         if (err) {
             log.warn('Error during player creation:\n', err);
-            return res.json(uniformResponses.createErrorResponse(err, 9001));
+            return res.status(500).json(uniformResponses.createErrorResponse(err, 9001));
         }
         Account.register(user, req.body.password, function(err) {
             if (err) {
                 log.warn('error during singup:\n', err);
                 // We need to remove player created before signup
-                Player.findByIdAndRemove(player._id, function(err) {
-                    if (err) {
-                        log.error('Whoa, player remove has failed, this can cause problem:\n', err);
+                Player.findByIdAndRemove(player._id, function(perr) {
+                    if (perr) {
+                        log.error('Whoa, player remove has failed, this can cause problems:\n', perr);
                         // we can do nothing here
                     }
-                    return res.json(uniformResponses.createErrorResponse(err, 9001));
+
+                    if (err.name === 'BadRequestError') {
+                        // Error from passport-local-mongoose
+                        // TODO this should be handled better
+                        return res.status(400).json(uniformResponses.createErrorResponse(err, 1001));
+                    } else {
+                        return res.status(500).json(uniformResponses.createErrorResponse(err, 9001));
+                    }
                 });
                 // ASSERT_NOT_REACHED
             } else {
                 req.login(user, function(err) {
                     if (err) {
                         log.warn('error during singup login:\n', err);
-        //                if (registrationCb) {
-        //                    setTimeout(registrationCb, 0);
-        //                }
-                        // TODO fix error message and code
-                        return res.json(uniformResponses.createErrorResponse(err, 9001));
+                        // TODO fix error message and code, until then we assume registration went ok
+                        //return res.status(500).json(uniformResponses.createErrorResponse(err, 9001));
                     }
+//                  if (registrationCb) {
+//                      setTimeout(registrationCb, 0);
+//                  }
                     return res.json(uniformResponses.createSuccessResponse());
                 });
                 // ASSERT_NOT_REACHED
