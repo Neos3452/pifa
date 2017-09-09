@@ -62,6 +62,6 @@ mongoose.connection.once('open', function() {
     // start app ===============================================
     app.listen(port);
 
-    // shoutout to the user
+    // shout out to the user
     log.info('Application started on :' + port);
 });
