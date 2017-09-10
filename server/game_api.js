@@ -76,15 +76,15 @@ module.exports.createGame = function(req, res) {
         }
         // When we get all the ids, save the game
         when.all(promises)
-            .then(game.save)
+            .then(game.save.bind(game))
             .then(function() {
-                    res.json(uniformResponses.createSuccessResponse());
+                    res.status(201).json(game);
                 })
             .catch(function(err) {
-                    log.err(err);
+                    log.error(err);
                     res.json(uniformResponses.createErrorResponse(err, 9001));
                 });
     } else {
-        res.json(uniformResponses.createErrorResponse(undefined, 1001));
+        res.status(400).json(uniformResponses.createErrorResponse('Empty request', 1001));
     }
 };

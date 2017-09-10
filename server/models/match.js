@@ -18,7 +18,6 @@ var TeamDesc = {
 
 // sub-doc not saved directly into database
 var Match = new mongoose.Schema({
-    game : {type: mongoose.Schema.Types.ObjectId, ref: 'Game', required: true},
     matchNumber : Number,
     team1 : TeamDesc,
     team2 : TeamDesc,

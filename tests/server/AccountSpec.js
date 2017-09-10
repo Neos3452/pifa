@@ -27,7 +27,7 @@ describe('Account', function() {
     });
 
     describe('registration', function() {
-        var agent = null;
+        let agent = null;
 
         beforeEach(function(){
             agent = request.agent(accountApp);
@@ -35,23 +35,22 @@ describe('Account', function() {
 
         afterEach(function(done) {
             when.all([
-                    Account.remove({}).exec(),
-                    Player.remove({}).exec()
+                    Account.remove({}).exec()
                 ]).then(function() {
                     delete mongoose.models.Account;
                     delete mongoose.modelSchemas.Account;
-                    delete mongoose.models.Player;
-                    delete mongoose.modelSchemas.Player;
                 }).then(done);
         });
 
         it('is possible', function(done) {
+            const username = 'dummy';
+            const team = 'sample team';
             agent.post('/create')
-                .send({username: 'dummy', password: 'even dummier'})
+                .send({username: username, password: 'even dummier', team: team})
                 .end(function(err, res){
                     expect(err).toBeNull();
-                    expect(res.status).toBe(200);
-                    expect(res.body.result).toBe('success');
+                    expect(res.status).toBe(201);
+                    expect(res.body).toEqual({username: username, name: username, team: team});
                     expect(res.body.errorObject).not.toBeDefined();
                     done();
                 });
@@ -59,11 +58,11 @@ describe('Account', function() {
 
         it('logs in automatically', function(done) {
             agent.post('/create')
-                .send({username: 'dummy', password: 'even dummier'})
+                .send({username: 'dummy', password: 'even dummier', team: 'sample team'})
                 .end(function(err, res){
                     expect(err).toBeNull();
-                    expect(res.status).toBe(200);
-                    expect(res.body.result).toBe('success');
+                    expect(res.status).toBe(201);
+                    // expect(res.body.result).toBe('success');
                     expect(res.body.errorObject).not.toBeDefined();
                     agent.get('/logged')
                         .end(function(err, res){
@@ -76,19 +75,17 @@ describe('Account', function() {
 
         it('forbids multiple registrations', function(done) {
             agent.post('/create')
-                .send({username: 'dummy', password: 'even dummier'})
+                .send({username: 'dummy', password: 'even dummier', team: 'team'})
                 .end(function(err, res){
                     expect(err).toBeNull();
-                    expect(res.status).toBe(200);
-                    expect(res.body.result).toBe('success');
+                    expect(res.status).toBe(201);
                     expect(res.body.errorObject).not.toBeDefined();
 
                     agent.post('/create')
-                        .send({username: 'dummy', password: 'even dummier'})
+                        .send({username: 'dummy', password: 'even dummier', team: 'team'})
                         .end(function(err, res){
                             expect(err).toBeNull();
-                            expect(res.status).toBe(200);
-                            expect(res.body.result).toBe('failure');
+                            expect(res.status).toBe(409);
                             done();
                         });
                 });

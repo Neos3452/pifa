@@ -95,8 +95,10 @@ module.exports.register = function(req, res) {
     const user = new Account({username: req.body.username, name: req.body.username, team:req.body.team});
     Account.register(user, req.body.password, function(err) {
         if (err) {
-            log.warn('error during signup:\n', err);
-            return res.status(500).json(uniformResponses.createErrorResponse(err, 9001));
+            log.warn('error during signup: ' + err);
+            if (err.name === 'UserExistsError')
+                return res.status(409).json(uniformResponses.createErrorResponse(err.message, 1001));
+            return res.status(500).json(uniformResponses.createErrorResponse(err.message, 9001));
         } else {
             req.login(user, function (err) {
                 if (err) {
@@ -107,7 +109,7 @@ module.exports.register = function(req, res) {
 //              if (registrationCb) {
 //                  setTimeout(registrationCb, 0);
 //              }
-                return res.json(user.safeObject());
+                return res.status(201).json(user.safeObject());
             });
         }
     });

@@ -46,15 +46,13 @@ describe('Game', function() {
                 })
                 .end(function(err, res){
                     expect(err).toBeNull();
-                    expect(res.status).toBe(200);
-                    expect(res.body.result).toBe('success');
+                    expect(res.status).toBe(201);
                     expect(res.body.errorObject).not.toBeDefined();
                     agent.get('/')
                         .send({})
                         .end(function(err, res){
                             expect(err).toBeNull();
                             expect(res.status).toBe(200);
-                            expect(res.body.result).toBe('success');
                             expect(res.body.errorObject).not.toBeDefined();
                             expect(res.body.data.length).toBe(1);
                             done();
@@ -81,15 +79,13 @@ describe('Game', function() {
                 })
                 .end(function(err, res){
                     expect(err).toBeNull();
-                    expect(res.status).toBe(200);
-                    expect(res.body.result).toBe('success');
+                    expect(res.status).toBe(201);
                     expect(res.body.errorObject).not.toBeDefined();
                     agent.get('/')
                         .send({})
                         .end(function(err, res){
                             expect(err).toBeNull();
                             expect(res.status).toBe(200);
-                            expect(res.body.result).toBe('success');
                             expect(res.body.errorObject).not.toBeDefined();
                             expect(res.body.data.length).toBe(1);
                             done();
