@@ -7,7 +7,6 @@ describe('Account', function() {
     var db = require('../../config/test_db');
 
     var Account = require('../../server/models/account');
-    var Player = require('../../server/models/player');
     var express = require('express');
     var accountRoutes = require('../../server/account_routes');
 

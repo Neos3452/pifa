@@ -1,21 +1,28 @@
 /*jslint jasmine:true, angular:true*/
 /*global module, inject */
 
-describe('AccountController', function() {
-  beforeEach(module('AccountCtrl'));
+describe('AccountController', function () {
+    "use strict";
 
-  var $controller;
+    let $controller;
 
-  beforeEach(inject(function(_$controller_){
-    // The injector unwraps the underscores (_) from around the parameter names when matching
-    $controller = _$controller_;
-  }));
+    beforeEach(module('AccountCtrl'));
+    beforeEach(inject(function (_$controller_) {
+        // The injector unwraps the underscores (_) from around the parameter names when matching
+        $controller = _$controller_;
+    }));
 
-  describe('tagline', function() {
-    it('equals to set string', function() {
-      var $scope = {};
-      var controller = $controller('AccountController', { $scope: $scope });
-      expect($scope.tagline).toEqual('Your account page');
+    describe('userdata', function () {
+        const userData = {username:"Dumb user name", team:"Example team"};
+
+        it('is same as in account data', function () {
+            var $scope = {};
+            var controller = $controller('AccountController', {
+                $scope: $scope,
+                Account:{data:{currentUser:userData}}
+            });
+            expect($scope.username).toEqual(userData.username);
+            expect($scope.userteam).toEqual(userData.team);
+        });
     });
-  });
 });

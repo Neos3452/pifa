@@ -6,9 +6,13 @@ angular.module('AccountService', []).service('Account', ['$http', '$q', '$rootSc
         loginStatus: false,
         lastChecked: Date.now(),
         kLoggedCheckTimeout: 1 * 60 * 60 * 1000, // 1 hour
+        currentUser: null,
     };
 
     const changeLoginStatus = function (newValue) {
+        if (!newValue) {
+            data.currentUser = null;
+        }
         data.loginStatus = newValue;
         data.lastChecked = Date.now();
 //        if (loginStatus !== oldStatus) {
@@ -18,8 +22,9 @@ angular.module('AccountService', []).service('Account', ['$http', '$q', '$rootSc
 
     const login = function(username, password) {
         return $http.post('/api/login', {username: username, password:password})
-            .then(function() {
-                    console.log('ok');
+            .then(function(res) {
+                    console.log('ok - ' + JSON.stringify(res.data));
+                    data.currentUser = res.data;
                     changeLoginStatus(true);
                 }, function() {
                     console.log('not');
@@ -43,7 +48,9 @@ angular.module('AccountService', []).service('Account', ['$http', '$q', '$rootSc
         // Check whether the cache has expired and if so make the request
         if (Date.now() - data.lastChecked < data.kLoggedCheckTimeout) {
             return $http.get('/api/logged')
-                .then(function() {
+                .then(function(res) {
+                    console.log('ok - ' + JSON.stringify(res.data));
+                    data.currentUser = res.data;
                     changeLoginStatus(true);
                 }, function() {
                     changeLoginStatus(false);
@@ -58,9 +65,11 @@ angular.module('AccountService', []).service('Account', ['$http', '$q', '$rootSc
         }
     };
 
-    const register = function(username, password) {
-        return $http.post('/api/register', {username: username, password: password})
-            .then(function() {
+    const register = function(username, password, team) {
+        return $http.post('/api/account', {username: username, password: password, team: team})
+            .then(function(res) {
+                console.log('registered - ' + JSON.stringify(res.data));
+                data.currentUser = res.data;
                 changeLoginStatus(true);
             }, function(status) {
                 return $q.reject({reason: status === 400 ? 'input' : 'internal'});

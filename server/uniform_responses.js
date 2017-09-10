@@ -1,6 +1,6 @@
 /*jslint node:true */
 "use strict";
-var errorCodeMap = {
+const errorCodeMap = {
     0 : 'No error Error (this should not happen)',
     1001 : 'Incorrect parameters',
     9001 : 'Database error',

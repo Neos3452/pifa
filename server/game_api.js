@@ -5,8 +5,8 @@ var bodyParser = require('body-parser');
 var log = require('winston');
 var when = require('when');
 
+var Account = require ('./models/account');
 var Game = require('./models/game');
-var Player = require('./models/player');
 var uniformResponses = require('./uniform_responses');
 
 module.exports.init = function () {
@@ -65,13 +65,13 @@ module.exports.createGame = function(req, res) {
             log.info('match ' + i + ' ' + match);
             match.game = game;
             // TODO fail if not found
-            promises.push(Player.findOne({name: match.team1.players.offense}).exec()
+            promises.push(Account.findOne({name: match.team1.players.offense}).exec()
                             .then(assignOffense.bind(this, match.team1.players)));
-            promises.push(Player.findOne({name: match.team1.players.defense}).exec()
+            promises.push(Account.findOne({name: match.team1.players.defense}).exec()
                             .then(assignDefense.bind(this, match.team1.players)));
-            promises.push(Player.findOne({name: match.team2.players.offense}).exec()
+            promises.push(Account.findOne({name: match.team2.players.offense}).exec()
                             .then(assignOffense.bind(this, match.team2.players)));
-            promises.push(Player.findOne({name: match.team2.players.defense}).exec()
+            promises.push(Account.findOne({name: match.team2.players.defense}).exec()
                             .then(assignDefense.bind(this, match.team2.players)));
         }
         // When we get all the ids, save the game

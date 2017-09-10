@@ -12,7 +12,6 @@ var cookieSession       = require('cookie-session');
 var log = require('winston');
 
 var Account = require('./models/account');
-var Player = require('./models/player');
 var uniformResponses = require('./uniform_responses');
 
 var ensureAuthentication = module.exports.ensureAuthentication = function (req, res, next) {
@@ -69,7 +68,7 @@ module.exports.getUserInfo = function(req, res) {
                 if (!accounts) {
                     accounts = {};
                 }
-                res.json(uniformResponses.createSuccessResponse(accounts));
+                res.status(404).json(accounts.map((a) => a.safeObject()));
             }
         });
     } else {
@@ -80,7 +79,7 @@ module.exports.getUserInfo = function(req, res) {
             if (err) {
                 res.json(uniformResponses.createErrorResponse(err, 9001));
             } else {
-                res.json(uniformResponses.createSuccessResponse(accounts));
+                res.json(accounts.map((a) => a.safeObject()));
             }
         });
     }
@@ -93,47 +92,24 @@ module.exports.register = function(req, res) {
     log.info("username:" + req.body.username);
 
     // register user locally
-    var user = new Account({username: req.body.username, originalTeam:req.body.team});
-    var player = new Player({account: user, name: req.body.username});
-    player.save(function(err) {
+    const user = new Account({username: req.body.username, name: req.body.username, team:req.body.team});
+    Account.register(user, req.body.password, function(err) {
         if (err) {
-            log.warn('Error during player creation:\n', err);
+            log.warn('error during signup:\n', err);
             return res.status(500).json(uniformResponses.createErrorResponse(err, 9001));
+        } else {
+            req.login(user, function (err) {
+                if (err) {
+                    log.warn('error during singup login:\n', err);
+                    // TODO fix error message and code, until then we assume registration went ok
+                    //return res.status(500).json(uniformResponses.createErrorResponse(err, 9001));
+                }
+//              if (registrationCb) {
+//                  setTimeout(registrationCb, 0);
+//              }
+                return res.json(user.safeObject());
+            });
         }
-        Account.register(user, req.body.password, function(err) {
-            if (err) {
-                log.warn('error during singup:\n', err);
-                // We need to remove player created before signup
-                Player.findByIdAndRemove(player._id, function(perr) {
-                    if (perr) {
-                        log.error('Whoa, player remove has failed, this can cause problems:\n', perr);
-                        // we can do nothing here
-                    }
-
-                    if (err.name === 'BadRequestError') {
-                        // Error from passport-local-mongoose
-                        // TODO this should be handled better
-                        return res.status(400).json(uniformResponses.createErrorResponse(err, 1001));
-                    } else {
-                        return res.status(500).json(uniformResponses.createErrorResponse(err, 9001));
-                    }
-                });
-                // ASSERT_NOT_REACHED
-            } else {
-                req.login(user, function(err) {
-                    if (err) {
-                        log.warn('error during singup login:\n', err);
-                        // TODO fix error message and code, until then we assume registration went ok
-                        //return res.status(500).json(uniformResponses.createErrorResponse(err, 9001));
-                    }
-//                  if (registrationCb) {
-//                      setTimeout(registrationCb, 0);
-//                  }
-                    return res.json(uniformResponses.createSuccessResponse());
-                });
-                // ASSERT_NOT_REACHED
-            }
-        });
     });
 
 };
@@ -141,13 +117,13 @@ module.exports.register = function(req, res) {
 // route to log in
 module.exports.login = [
     passport.authenticate('local'),
-    function(req, res) { res.sendStatus(200); }
+    function(req, res) { res.json(req.user.safeObject()); }
 ];
 
 // route to check if logged in
 module.exports.loginStatus = [
     ensureAuthentication,
-    function(req, res) { res.sendStatus(200); }
+    function(req, res) { res.json(req.user.safeObject()); }
 ];
 
 // route to log out

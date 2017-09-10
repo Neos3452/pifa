@@ -26,7 +26,7 @@ module.exports = function(app) {
                 next();
             },
             account.getUserInfo);
-    app.post('/api/account', account.register);
+    app.post('/api/account', account.register, account.login);
     app.post('/api/login', account.login);
     app.get('/api/logged', account.loginStatus);
     app.post('/api/logout', account.logout);
@@ -39,7 +39,7 @@ module.exports = function(app) {
 
     // other routes
     app.get('/api/game', game.getGames);
-    app.post('/api/game', game.createGame);
+    app.post('/api/game', account.ensureAuthentication, game.createGame);
 
     // frontend routes =========================================================
 

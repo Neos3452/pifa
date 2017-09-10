@@ -1,7 +1,8 @@
 /*global angular */
 (function() {
 "use strict";
-angular.module('AccountCtrl', []).controller('AccountController', function($scope) {
-    $scope.tagline = 'Your account page';
+angular.module('AccountCtrl', ['AccountService']).controller('AccountController', function($scope, Account) {
+    $scope.username = Account.data.currentUser.username;
+    $scope.userteam = Account.data.currentUser.team;
 });
 })();
