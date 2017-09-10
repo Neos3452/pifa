@@ -1,5 +1,16 @@
 /*global angular */
 (function() {
 "use strict";
-angular.module('app', ['ngRoute', 'appRoutes', 'NavigatorCtrl', 'MainCtrl', 'PlayerCtrl', 'PlayerService', 'AccountCtrl', 'SigninCtrl', 'LogoutCtrl']);
+angular.module('app', [
+    'ngRoute',
+    'appRoutes',
+    'AccountCtrl',
+    'LogoutCtrl',
+    'MainCtrl',
+    'NavigatorCtrl',
+    'NotFoundCtrl',
+    'PlayerCtrl',
+    'PlayerService',
+    'SigninCtrl',
+]);
 })();
